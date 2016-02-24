@@ -1,0 +1,22 @@
+﻿@model MvcTemplate.Web.ViewModels.Irregularity.AddIrregularityViewModel
+
+@using (Html.BeginForm("Add", "Irregularity", FormMethod.Post, new { @id = "addIrregularityForm", @class = "form", enctype = "multipart/form-data" }))
+{
+    @Html.AntiForgeryToken()
+    <h2>Add new irregularity</h2>
+    <br />
+    @Html.EditorFor(m => m.CategoryId, new { ListItem = Model.Categories })
+    @Html.EditorFor(m => m.Title)
+    @Html.EditorFor(m => m.Description)
+    @Html.TextBoxFor(m => m.UploadedImage, new { type = "file" })
+    @Html.TextBoxFor(m => m.Latitude, new {@id = "latitude", style = "display:none" })
+    @Html.TextBoxFor(m => m.Longitude, new {@id = "longitude", style = "display:none" })
+    <div class="row">
+        <div class="col-md-2 col-md-offset-8">
+            <input id="submitIrregularityButton" type="button" class="btn btn-default" value="Add" />
+        </div>
+    </div>
+}
+@section scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+}

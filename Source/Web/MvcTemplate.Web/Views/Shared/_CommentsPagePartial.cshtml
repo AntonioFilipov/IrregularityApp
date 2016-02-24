@@ -1,0 +1,20 @@
+﻿@using MvcTemplate.Common.Extensions
+@model ICollection<MvcTemplate.Web.ViewModels.Comments.CommentViewModel>
+
+<ul class="media-list">
+    <li class="media">
+        <div class="media-body">
+            @foreach (var item in Model)
+            {
+                <h4 class="media-heading">
+                    <span class="label label-default">@item.CreatedOn.ToString("MMMM dd,yyyy HH:mm")</span>
+                </h4>
+                <br />
+                <p class="break-word">
+                    @item.Content
+                </p>
+                <br />
+            }
+        </div>
+    </li>
+</ul>

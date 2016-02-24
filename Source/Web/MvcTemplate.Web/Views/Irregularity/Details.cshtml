@@ -1,0 +1,95 @@
+﻿@using System.Drawing
+@using System.Globalization
+@using System.Web.Mvc.Html
+@using Jmelosegui.Mvc.GoogleMap
+@using MvcTemplate.Data.Models
+@using MvcTemplate.Web.ViewModels.Comments
+@model MvcTemplate.Web.ViewModels.Irregularity.IrregularityDetailsViewModel
+
+<div class="col-md-1">
+    <div class="well text-center">
+        <div class="row">@Model.RatingsCount</div>
+        @*@Html.Partial("_VotePartial", @Model.VotesModel)*@
+        <div class="row">votes</div>
+    </div>
+</div>
+<div class="col-md-11">
+    <div class="row featurette">
+        <div class="col-md-4">
+            <fieldset>
+                <legend>
+                    Comments <span class="label label-default">
+                        @Model.CommentsCount
+                    </span>
+                </legend>
+            </fieldset>
+            <div>
+                @Html.Partial("_AddCommentPartial", new CommentAddViewModel())
+            </div>
+            <div>
+                @Html.Partial("_CommentsPagePartial", Model.Comments)
+            </div>
+            <div>
+                @Html.Partial("_CommentsPaginationPartial", Model.PagesCount)
+            </div>
+        </div>
+
+        <div class="col-md-8">
+        @{
+            Html.GoogleMap()
+                .Name("map")
+                .Height(500)
+                .Center(c => c
+                    //this will be the Latitude if your map do not support
+                    //geolocation or the client denies the location sharing
+                    .Latitude(double.Parse(@Model.Position.Latitude, CultureInfo.InvariantCulture))
+                    //this will be the Longitude if your map do not support
+                    //geolocation or the client denies the location sharing
+                    .Longitude(double.Parse(@Model.Position.Longitude, CultureInfo.InvariantCulture)))
+                .ClientEvents(events => events
+                    .OnMapLoaded("mapLoadedHandler")
+                )    
+                .Markers(m => m.Add()
+                    .Title(@Model.Title)
+                    .Window(window => window.Add()
+                        .MaxWidth(400)
+                        .ZIndex(3)
+                        .DisableAutoPan(false)
+                        .Content(
+                            @<text>
+                                <div class="row featurette">
+                                    <div class="col-md-5">
+                                        <a href="@Url.Action("Image", "Irregularity", new {id = Model.ImageId})">
+                                            <img class="featurette-image img-responsive center-block" style="width: 100%" src="@Url.Action("Image", "Irregularity", new {id = Model.ImageId})"/>
+                                        </a>
+                                    </div>
+                                    <div class="col-md-7">
+                                        <h2 class="featurette-heading">@Model.Title </h2>
+                                        <span class="text-muted label label-default">@Model.CreatedOn.ToString("MMMM dd, yyyy")</span>
+                                        <p class="lead">@Model.Description</p>
+                                    </div>
+                                </div>
+                            </text>
+                        )
+                    )
+                )
+                .Render();
+        }
+        @**@
+        </div>
+    </div>
+    
+<div class="row">
+    
+</div>
+@section scripts
+{
+    @(Html.GoogleMap().ScriptRegistrar())
+    <script type="text/javascript">
+
+        function mapLoadedHandler(args) {
+            var markers = args.markers;
+            google.maps.event.trigger(markers[0], 'click');
+        }
+    </script>
+}

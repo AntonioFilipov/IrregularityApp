@@ -1,0 +1,36 @@
+﻿@using MvcTemplate.Data.Models
+@model MvcTemplate.Web.ViewModels.Irregularity.ViewIrregularityViewModel
+
+
+<ul class="timeline">
+    @for (int i = 0; i < Model.Irregularities.Count; i++)
+    {
+        @:<li @{ if (i % 2 == 0) { <text> class="timeline-inverted" </text>   } }>
+
+        if (Model.Irregularities[i].ImageId != null)
+        {
+            <div class="timeline-badge">
+                <a href="@Url.Action("Image", "Irregularity", new {id = Model.Irregularities[i].ImageId})">
+                    <img class="raunded-image" src="@Url.Action("Image", "Irregularity", new {id = Model.Irregularities[i].ImageId})"/>
+                </a>
+            </div>
+        }
+        else
+        {
+            <div class="timeline-badge-no-image">
+            </div>
+        }
+        <div class="timeline-panel">
+            <div class="timeline-heading">
+                <a href="@Url.Action("Details", "Irregularity", new {area = string.Empty, id = @Model.Irregularities[i].Id})">
+                    <h4 class="timeline-title">@Model.Irregularities[i].Title</h4>
+                </a>
+                @Model.Irregularities[i].Category.Name
+                <p>
+                    <small class="text-muted"><i class="glyphicon glyphicon-time"></i> @Model.Irregularities[i].CreatedOn</small>
+                </p>
+            </div>
+        </div>
+        @:</li>
+    }
+</ul>

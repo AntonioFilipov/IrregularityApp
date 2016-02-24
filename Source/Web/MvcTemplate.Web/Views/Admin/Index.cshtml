@@ -1,0 +1,33 @@
+﻿@using Kendo.Mvc.UI
+
+@(Html.Kendo().Grid<MvcTemplate.Data.Models.Irregularity>()
+      .Name("grid")
+      .Columns(columns =>
+      {
+        columns.Bound(c => c.Title);
+        columns.Bound(c => c.Description);
+        columns.Bound(c => c.CreatedOn);
+        columns.Bound(c => c.ModifiedOn);
+        columns.Bound(c => c.IsDeleted);
+        columns.Bound(c => c.DeletedOn);
+        columns.Command(command => { command.Edit(); command.Destroy(); }).Width(180);
+      })
+      .ToolBar(toolbar => {
+            toolbar.Create();
+      })
+      .Editable(editable => editable.Mode(GridEditMode.PopUp))
+      .Pageable()
+      .Sortable(sortable => {
+          sortable.SortMode(GridSortMode.MultipleColumn);
+      })
+      .Filterable()
+      .Scrollable()
+      .DataSource(dataSource => dataSource
+          .Ajax()
+          .Model(model => model.Id(p => p.Id))
+          .Read(read => read.Action("Irregularities_Read", "Admin"))
+          .Create(create => create.Action("Irregularities_Create", "Admin"))
+          .Update(update => update.Action("Irregularities_Update", "Admin"))
+          .Destroy(destroy => destroy.Action("Irregularities_Destroy", "Admin"))
+      )
+)

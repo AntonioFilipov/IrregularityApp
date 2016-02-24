@@ -1,0 +1,24 @@
+﻿@model int
+
+@{
+    var currentPage = int.Parse(Request.QueryString["page"] == null ? "0" : Request.QueryString["page"]);
+    var ideaId = int.Parse(Url.RequestContext.RouteData.Values["id"].ToString());
+
+    <nav>
+        <ul class="pagination">
+            <li><a href="@Url.Action("Details", "Irregularity", new { area = string.Empty, id = ideaId, page = (currentPage == 1 ? 1 : currentPage - 1)})" aria-label="Previous"><span aria-hidden="true">&laquo;</span></a></li>
+            @for (int i = 1; i <= Model; i++)
+            {
+                if (Request.QueryString["page"] == i.ToString())
+                {
+                    <li class="active"><a href="@Url.Action("Details", "Irregularity", new { area = string.Empty, id = ideaId, page = i })">@i<span class="sr-only">(current)</span></a></li>
+                }
+                else
+                {
+                    <li><a href="@Url.Action("Details", "Irregularity", new { area = string.Empty, id = ideaId, page = i })">@i</a></li>
+                }
+            }
+            <li><a href="@Url.Action("Details", "Irregularity", new { area = string.Empty, id = ideaId, page = (currentPage == Model ? Model : currentPage + 1)})" aria-label="Next"><span aria-hidden="true">&raquo;</span></a></li>
+        </ul>
+    </nav>
+}

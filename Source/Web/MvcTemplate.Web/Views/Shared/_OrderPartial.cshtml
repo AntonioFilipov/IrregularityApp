@@ -1,0 +1,9 @@
+﻿@{
+    var currentPage = int.Parse(Request.QueryString["page"] == null ? "0" : Request.QueryString["page"]);
+    var currentSearch = Request.QueryString["search"];
+
+    <div id="sortingMenu" class="btn-group" role="group">
+        <a href="@Url.Action("All", "Irregularity", new { area = string.Empty, page = 1, orderBy = "votes", search = currentSearch })" class="btn btn-default">Top irregularities</a>
+        <a href="@Url.Action("All", "Irregularity", new { area = string.Empty, page = 1, orderBy = "date", search = currentSearch })" class="btn btn-default">Most recent</a>
+    </div>
+}

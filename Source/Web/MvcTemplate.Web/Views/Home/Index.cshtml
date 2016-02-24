@@ -1,0 +1,111 @@
+﻿@model MvcTemplate.Web.ViewModels.Irregularity.HomeViewModel
+@{
+    ViewBag.Title = "Home Page";
+}
+@using System.Drawing
+@using System.Globalization
+@using Jmelosegui.Mvc.GoogleMap
+@using MvcTemplate.Data.Models
+
+<div class="row">
+    <div class="col-md-8">
+        @{
+            Html.GoogleMap()
+                .Name("map")
+                .Height(500)
+                .Center(c => c.UseCurrentPosition()
+                    //this will be the Latitude if your map do not support
+                    //geolocation or the client denies the location sharing
+                    .Latitude(23d)
+                    //this will be the Longitude if your map do not support
+                    //geolocation or the client denies the location sharing
+                    .Longitude(-82.3d))
+                .BindTo<Irregularity, Marker>
+                (Model.View.Irregularities, mappings =>
+                {
+                    mappings.For<Irregularity>(binding => binding
+                        .ItemDataBound
+                        (
+                            (marker, obj) =>
+                            {
+                                marker.Latitude = double.Parse(obj.Position.Latitude, CultureInfo.InvariantCulture);
+                                marker.Longitude = double.Parse(obj.Position.Longitude, CultureInfo.InvariantCulture);
+                                marker.Title = obj.Title;
+                                marker.Icon = new MarkerImage("~/imgs/attention.png", new Size(18, 12)
+                                    , new Point(0, 0)
+                                    , new Point(0, 12));
+                                marker.Window = new InfoWindow(marker)
+                                {
+                                    Template =
+                                    {
+                                        Content = () => ViewContext.Writer.Write(
+                                            "<a href=/Irregularity/Details/"+obj.Id+"><h3>"+obj.Title+"</h3></a>" +
+                                            "<img style=width:100% src=/Irregularity/Image/"+obj.ImageId+"/>")
+                                    }
+                                };
+                            }
+                        )
+                        );
+                })
+                .ClientEvents(events => events
+                    .OnMapBoundChanged("highlightEvent")
+                    .OnMapCenterChanged("highlightEvent")
+                )
+                .Markers(m => m.Add()
+                    .Title("Click to add an irregularity")
+                    .Draggable(true)
+                    .Window(window => window.Add()
+                        .MaxWidth(400)
+                        .ZIndex(3)
+                        .DisableAutoPan(false)
+                        .Content(
+                            @<text>
+                                @Html.Partial("_AddIrregularityPartial", Model.Add)
+                             </text>)
+                    )
+                ).MarkerEvents(events =>
+                    events.OnMarkerClick("highlightEvent")
+                        .OnMarkerDragStart("highlightEvent")
+                        .OnMarkerDrag("highlightEvent")
+                        .OnMarkerDragEnd("highlightEvent")
+                        
+                )
+                .Render();
+        }
+    </div>
+    <div class="col-md-4">
+        @Html.Action("MostRecentIrregularities")
+    </div>
+</div>
+
+
+@section scripts
+{
+    @(Html.GoogleMap().ScriptRegistrar())
+    <script type="text/javascript">
+        var lat, lng;
+        $(document).ready(function() {
+            $(document).on('click','#submitIrregularityButton', function (e) {
+                e.preventDefault();
+                console.log(lat);
+                console.log(lng);
+                $('#latitude').val(lat);
+                $('#longitude').val(lng);
+                $('#addIrregularityForm').submit();
+            });
+        });
+      
+
+        function highlightEvent(args) {
+            console.log(args);
+            if (args.eventName === 'dragend' || args.eventName === 'click') {
+                lat = args.marker.position.lat();
+                lng = args.marker.position.lng();
+                args.marker.setAnimation(google.maps.Animation.BOUNCE);
+                setTimeout(function () {
+                    args.marker.setAnimation(null);
+                }, 1000);
+            }
+        }
+    </script>
+}

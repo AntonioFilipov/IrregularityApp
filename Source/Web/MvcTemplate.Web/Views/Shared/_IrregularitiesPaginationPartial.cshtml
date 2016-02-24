@@ -1,0 +1,25 @@
+﻿@model int
+
+@{
+    var currentPage = int.Parse(Request.QueryString["page"] == null ? "0" : Request.QueryString["page"]);
+    var currentOrder = Request.QueryString["orderBy"];
+    var currentSearch = Request.QueryString["search"];
+
+    <nav id="paginationContainer">
+        <ul class="pagination">
+            <li><a href="@Url.Action("All", "Irregularity", new { area = string.Empty, search = currentSearch, orderBy = currentOrder, page = (currentPage == 1 ? 1 : currentPage - 1)})" aria-label="Previous"><span aria-hidden="true">&laquo;</span></a></li>
+            @for (int i = 1; i <= Model; i++)
+            {
+                if (Request.QueryString["page"] == i.ToString())
+                {
+                    <li class="active"><a href="@Url.Action("All", "Irregularity", new { area = string.Empty, search = currentSearch, orderBy = currentOrder, page = i })">@i<span class="sr-only">(current)</span></a></li>
+                }
+                else
+                {
+                    <li><a href="@Url.Action("All", "Irregularity", new { area = string.Empty, search = currentSearch, orderBy = currentOrder, page = i })">@i</a></li>
+                }
+            }
+            <li><a href="@Url.Action("All", "Irregularity", new { area = string.Empty, search = currentSearch, orderBy = currentOrder, page = (currentPage == Model ? Model : currentPage + 1)})" aria-label="Next"><span aria-hidden="true">&raquo;</span></a></li>
+        </ul>
+    </nav>
+}

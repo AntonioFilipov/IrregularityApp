@@ -1,0 +1,120 @@
+﻿@using System.Drawing
+@using System.Globalization
+@using System.Web.Mvc.Html
+@using Jmelosegui.Mvc.GoogleMap
+@using MvcTemplate.Data.Models
+@using MvcTemplate.Web.ViewModels.Home
+@model MvcTemplate.Web.ViewModels.Irregularity.IrregularityAllViewModel
+
+@{
+    ViewBag.Title = "All Irregularities";
+}
+
+<div class="row">
+    <div class="col-md-4">
+        <div class="row" id="sortingMenuContainer">
+            @Html.Partial("_OrderPartial")
+        </div>
+        @Html.Partial("_IrregularitiesPagePartial", Model.Irregularities)
+        @Html.Partial("_IrregularitiesPaginationPartial", Model.PagesCount)
+    </div>
+    <div class="col-md-8">
+        @{
+            Html.GoogleMap()
+                .Name("map")
+                .Height(500)
+                .Center(c => c.UseCurrentPosition()
+                    //this will be the Latitude if your map do not support
+                    //geolocation or the client denies the location sharing
+                    .Latitude(23d)
+                    //this will be the Longitude if your map do not support
+                    //geolocation or the client denies the location sharing
+                    .Longitude(-82.3d))
+                .BindTo<Irregularity, Marker>
+                (Model.MapIrregularities, mappings =>
+                {
+                    mappings.For<Irregularity>(binding => binding
+                        .ItemDataBound
+                        (
+                            (marker, obj) =>
+                            {
+                                marker.Id = obj.Id.ToString();
+                                marker.Latitude = double.Parse(obj.Position.Latitude, CultureInfo.InvariantCulture);
+                                marker.Longitude = double.Parse(obj.Position.Longitude, CultureInfo.InvariantCulture);
+                                marker.Title = obj.Title;
+                                marker.Icon = new MarkerImage("~/imgs/attention.png", new Size(18, 12)
+                                    , new Point(0, 0)
+                                    , new Point(0, 12));
+                                marker.Window = new InfoWindow(marker)
+                                {
+                                    Template =
+                                    {
+                                        Content = () => ViewContext.Writer.Write(
+                                            "<a href=/Irregularity/Details/" + obj.Id + "><h3>" + obj.Title + "</h3></a>" +
+                                            "<img style=width:100% src=/Irregularity/Image/" + obj.ImageId + "/>")
+                                    }
+                                };
+                            }
+                        )
+                        );
+                })
+                .ClientEvents(events => events.OnMapLoaded("onMapLoadHandler"))
+                .Markers(m => m.Add()
+                    .Title("Click to add an irregularity")
+                    .Window(window => window.Add()
+                        .MaxWidth(400)
+                        .ZIndex(3)
+                        .DisableAutoPan(false)
+                    )
+                )
+                .Render();
+        }
+    </div>
+
+</div>
+<div class="row">
+   
+</div>
+
+
+@section scripts {
+    @(Html.GoogleMap().ScriptRegistrar())
+    <script>
+        $(function() {
+            $('.link').click(function() {
+                var search = $("#search").val();
+                this.href = this.href.replace("xxx", search);
+            });
+        });
+    </script>
+    <script type="text/javascript">
+        var markers = {};
+        function onMapLoadHandler(args) {
+            console.log("on map loader");
+            markers = args.markers;
+        }
+        $(".title").click(function (e) {
+            e.preventDefault();
+            console.log(e);
+            var id = $(this).attr('data-id');
+            console.log(id);
+            google.maps.event.trigger(markers[id], 'click');
+        });
+    </script>
+
+    <script>
+        $('.voteBtn').click(function () {
+            console.log(".voteBtn");
+            var id = $(this).attr('data-id');
+            var value = $(this).attr('data-value');
+            console.log("id:" + id);
+            console.log("votes:" + value);
+
+            $.post("/Rating/Add", { irregularityId: id, ratings: value }, function (data) {
+                var newPoints = data.newPoints;
+                var pointsLeft = data.pointsLeft;
+                location.reload();
+            })
+        })
+    </script>
+}
